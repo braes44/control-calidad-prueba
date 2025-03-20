@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Control de Calidad - Ingreso y Gráficos</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        input { width: 60px; text-align: center; }
+        input[type="text"], input[type="datetime-local"] { width: 150px; }
+        button { padding: 10px; margin: 5px; }
+        #resultados { margin-top: 20px; }
+        .limit-input { width: 80px; }
+        #analisis { width: 100%; height: 100px; margin-top: 10px; }
+        .error { color: red; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Control de Calidad o control de procesos</h1>
+
+    <!-- Configuración General -->
+    <h2>Configuración General</h2>
+    <label>Título de Datos: <input type="text" id="tituloDatos" value="Ingresar Datos de Datos_1 "></label><br>
+    <label>Analista: <input type="text" id="analista" placeholder="Nombre del analista"></label><br>
+    <label>Lote: <input type="text" id="lote" placeholder="Nombre del lote"></label><br>
+    <label>Hora Inicio: <input type="datetime-local" id="horaInicio"></label><br>
+    <label>Hora Final: <input type="datetime-local" id="horaFinal"></label><br>
+
+    <!-- Configuración de Límites de Especificación -->
+    <h2>Límites de Especificación</h2>
+    <h3>Datos_1</h3>
+    <label>Límite Superior (LES): <input type="number" id="les1" value="116" class="limit-input" required></label>
+    <label>Límite Inferior (LEI): <input type="number" id="lei1" value="107" class="limit-input" required></label>
+    <div id="errorLimites1" class="error"></div>
+    
+    <h3>Datos_2</h3>
+    <label>Límite Superior (LES): <input type="number" id="les2" value="120" class="limit-input" required></label>
+    <label>Límite Inferior (LEI): <input type="number" id="lei2" value="110" class="limit-input" required></label>
+    <div id="errorLimites2" class="error"></div>
+
+    <!-- Nivel de Confianza -->
+    <h2>Nivel de Confianza para Intervalos</h2>
+    <label>Elegir nivel de confianza: 
+        <select id="confidenceLevel">
+            <option value="90">90%</option>
+            <option value="95" selected>95%</option>
+            <option value="99">99%</option>
+        </select>
+    </label>
+
+    <!-- Primera Sección de Ingreso de Datos -->
+    <h2 id="tituloDatosH2">Ingresar Datos de Datos_1</h2>
+    <table id="tablaDatos1">
+        <thead>
+            <tr>
+                <th>Muestra</th>
+                <th>Lote 1</th>
+                <th>Lote 2</th>
+                <th>Lote 3</th>
+            </tr>
+        </thead>
+        <tbody id="tablaBody1">
+            <tr><td>1</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>2</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>3</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>4</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>5</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>6</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>7</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>8</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>9</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>10</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+        </tbody>
+    </table>
+    <button onclick="agregarFila(1)">Agregar Muestra (Datos_1)</button>
+    <label><input type="checkbox" id="mostrarLimites1" checked> Mostrar Límites de Control en el Gráfico</label>
+
+    <!-- Segunda Sección de Ingreso de Datos -->
+    <h2>Ingresar Datos_2 </h2>
+    <table id="tabla2">
+        <thead>
+            <tr>
+                <th>Muestra</th>
+                <th>Lote 1</th>
+                <th>Lote 2</th>
+                <th>Lote 3</th>
+            </tr>
+        </thead>
+        <tbody id="tablaBody2">
+            <tr><td>1</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>2</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>3</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>4</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>5</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>6</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>7</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>8</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>9</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+            <tr><td>10</td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td><td><input type="number" step="0.1"></td></tr>
+        </tbody>
+    </table>
+    <button onclick="agregarFila(2)">Agregar Muestra Datos_2</button>
+    <label><input type="checkbox" id="mostrarLimites2" checked> Mostrar Límites de Control en el Gráfico</label>
+
+    <br>
+    <button onclick="calcularEstadisticas()">Calcular y Graficar</button>
+    <button onclick="exportarCSV()">Exportar a CSV</button>
+    <label>Cargar CSV: <input type="file" id="cargarCSV" accept=".csv" onchange="cargarCSV(event)"></label>
+    <div id="errorDatos" class="error"></div>
+
+    <!-- Resultados -->
+    <div id="resultados">
+        <h2>Resultados</h2>
+        <p>Analista: <span id="analistaRes"></span></p>
+        <p>Lote: <span id="loteRes"></span></p>
+        <p>Hora Inicio: <span id="horaInicioRes"></span></p>
+        <p>Hora Final: <span id="horaFinalRes"></span></p>
+        <table id="tablaResultados">
+            <tr><th>Estadístico</th><th>Lote 1</th><th>Lote 2</th><th>Lote 3</th></tr>
+            <tr><td>Promedio Datos_1</td><td id="avg1_1"></td><td id="avg1_2"></td><td id="avg1_3"></td></tr>
+            <tr><td>Desv. Est. Datos_1</td><td id="std1_1"></td><td id="std1_2"></td><td id="std1_3"></td></tr>
+            <tr><td>Rango Datos_1</td><td id="range1_1"></td><td id="range1_2"></td><td id="range1_3"></td></tr>
+            <tr><td>Máximo Datos_1</td><td id="max1_1"></td><td id="max1_2"></td><td id="max1_3"></td></tr>
+            <tr><td>Mínimo Datos_1</td><td id="min1_1"></td><td id="min1_2"></td><td id="min1_3"></td></tr>
+            <tr><td>LCS Datos_1</td><td id="lcs1_1"></td><td id="lcs1_2"></td><td id="lcs1_3"></td></tr>
+            <tr><td>LCI Datos_1</td><td id="lci1_1"></td><td id="lci1_2"></td><td id="lci1_3"></td></tr>
+            <tr><td>Intervalo Confianza Sup. Datos_1</td><td id="confSup1_1"></td><td id="confSup1_2"></td><td id="confSup1_3"></td></tr>
+            <tr><td>Intervalo Confianza Inf. Datos_1</td><td id="confInf1_1"></td><td id="confInf1_2"></td><td id="confInf1_3"></td></tr>
+            <tr><td>Cp Datos_1</td><td id="cp1_1"></td><td id="cp1_2"></td><td id="cp1_3"></td></tr>
+            <tr><td>Cpk Sup Datos_1</td><td id="cpkSup1_1"></td><td id="cpkSup1_2"></td><td id="cpkSup1_3"></td></tr>
+            <tr><td>Cpk Inf Datos_1</td><td id="cpkInf1_1"></td><td id="cpkInf1_2"></td><td id="cpkInf1_3"></td></tr>
+            <tr><td>Promedio Datos_2</td><td id="avg2_1"></td><td id="avg2_2"></td><td id="avg2_3"></td></tr>
+            <tr><td>Desv. Est. Datos_2</td><td id="std2_1"></td><td id="std2_2"></td><td id="std2_3"></td></tr>
+            <tr><td>Rango Datos_2</td><td id="range2_1"></td><td id="range2_2"></td><td id="range2_3"></td></tr>
+            <tr><td>Máximo Datos_2</td><td id="max2_1"></td><td id="max2_2"></td><td id="max2_3"></td></tr>
+            <tr><td>Mínimo Datos_2</td><td id="min2_1"></td><td id="min2_2"></td><td id="min2_3"></td></tr>
+            <tr><td>LCS Datos_2</td><td id="lcs2_1"></td><td id="lcs2_2"></td><td id="lcs2_3"></td></tr>
+            <tr><td>LCI Datos_2</td><td id="lci2_1"></td><td id="lci2_2"></td><td id="lci2_3"></td></tr>
+            <tr><td>Intervalo Confianza Sup. Datos_2</td><td id="confSup2_1"></td><td id="confSup2_2"></td><td id="confSup2_3"></td></tr>
+            <tr><td>Intervalo Confianza Inf. Datos_2</td><td id="confInf2_1"></td><td id="confInf2_2"></td><td id="confInf2_3"></td></tr>
+            <tr><td>Cp Datos_2</td><td id="cp2_1"></td><td id="cp2_2"></td><td id="cp2_3"></td></tr>
+            <tr><td>Cpk Sup Datos_2</td><td id="cpkSup2_1"></td><td id="cpkSup2_2"></td><td id="cpkSup2_3"></td></tr>
+            <tr><td>Cpk Inf Datos_2</td><td id="cpkInf2_1"></td><td id="cpkInf2_2"></td><td id="cpkInf2_3"></td></tr>
+        </table>
+        <textarea id="analisis" placeholder="Escribe tu análisis de la gráfica aquí..."></textarea>
+    </div>
+
+    <!-- Gráficas -->
+    <h2>Gráfico de Datos_1</h2>
+    <canvas id="graficoDatos1" width="400" height="200"></canvas>
+    <h2>Gráfico de Datos_2</h2>
+    <canvas id="graficoDatos2" width="400" height="200"></canvas>
+
+    <script>
+        let chart1, chart2;
+        let numMuestras1 = 10, numMuestras2 = 10;
+
+        function agregarFila(tipo) {
+            if (!Number.isInteger(tipo) || (tipo !== 1 && tipo !== 2)) return;
+            
+            const tbodyId = tipo === 1 ? 'tablaBody1' : 'tablaBody2';
+            const numMuestras = tipo === 1 ? ++numMuestras1 : ++numMuestras2;
+            const tbody = document.getElementById(tbodyId);
+            const nuevaFila = document.createElement('tr');
+            nuevaFila.innerHTML = `<td>${numMuestras}</td>
+                <td><input type="number" step="0.1"></td>
+                <td><input type="number" step="0.1"></td>
+                <td><input type="number" step="0.1"></td>`;
+            tbody.appendChild(nuevaFila);
+        }
+
+        function calcularEstadisticas() {
+            try {
+                const tituloDatos = document.getElementById('tituloDatos').value.trim() || "Ingresar Datos de Datos_1";
+                document.getElementById('tituloDatosH2').textContent = tituloDatos;
+
+                const analista = document.getElementById('analista').value.trim() || 'No especificado';
+                const lote = document.getElementById('lote').value.trim() || 'No especificado';
+                const horaInicio = document.getElementById('horaInicio').value || 'No especificado';
+                const horaFinal = document.getElementById('horaFinal').value || 'No especificado';
+                document.getElementById('analistaRes').textContent = analista;
+                document.getElementById('loteRes').textContent = lote;
+                document.getElementById('horaInicioRes').textContent = horaInicio;
+                document.getElementById('horaFinalRes').textContent = horaFinal;
+
+                const les1 = parseFloat(document.getElementById('les1').value);
+                const lei1 = parseFloat(document.getElementById('lei1').value);
+                if (isNaN(les1) || isNaN(lei1) || les1 <= lei1) {
+                    document.getElementById('errorLimites1').textContent = 
+                        'Error: Verifique que LES sea mayor que LEI para Datos_1 y ambos sean números válidos';
+                    return;
+                }
+                document.getElementById('errorLimites1').textContent = '';
+
+                const les2 = parseFloat(document.getElementById('les2').value);
+                const lei2 = parseFloat(document.getElementById('lei2').value);
+                if (isNaN(les2) || isNaN(lei2) || les2 <= lei2) {
+                    document.getElementById('errorLimites2').textContent = 
+                        'Error: Verifique que LES sea mayor que LEI para Datos_2 y ambos sean números válidos';
+                    return;
+                }
+                document.getElementById('errorLimites2').textContent = '';
+
+                const confidenceLevel = parseFloat(document.getElementById('confidenceLevel').value);
+                const zScore = confidenceLevel === 90 ? 1.645 : confidenceLevel === 95 ? 1.96 : 2.576;
+
+                const tablas = [
+                    { id: 'tablaDatos1', bodyId: 'tablaBody1', mostrarLimitesId: 'mostrarLimites1', graficoId: 'graficoDatos1', prefix: '1_', les: les1, lei: lei1 },
+                    { id: 'tabla2', bodyId: 'tablaBody2', mostrarLimitesId: 'mostrarLimites2', graficoId: 'graficoDatos2', prefix: '2_', les: les2, lei: lei2 }
+                ];
+
+                let hasData = false;
+                tablas.forEach((tabla, index) => {
+                    const filas = document.getElementById(tabla.bodyId).getElementsByTagName('tr');
+                    let datos = [[], [], []];
+
+                    for (let i = 0; i < filas.length; i++) {
+                        const inputs = filas[i].getElementsByTagName('input');
+                        for (let j = 0; j < 3; j++) {
+                            const valor = parseFloat(inputs[j].value);
+                            if (!isNaN(valor)) {
+                                datos[j].push(valor);
+                                hasData = true;
+                            }
+                        }
+                    }
+
+                    if (!hasData) {
+                        document.getElementById('errorDatos').textContent = 'Por favor ingrese al menos un dato válido';
+                        return;
+                    }
+                    document.getElementById('errorDatos').textContent = '';
+
+                    const resultados = datos.map((lote) => {
+                        if (lote.length < 2) return null;
+
+                        const avg = lote.reduce((a, b) => a + b, 0) / lote.length;
+                        const max = Math.max(...lote);
+                        const min = Math.min(...lote);
+                        const range = max - min;
+                        const std = Math.sqrt(lote.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / (lote.length - 1));
+                        const lcs = avg + 3 * std;
+                        const lci = avg - 3 * std;
+                        const errorStd = std / Math.sqrt(lote.length);
+                        const confSup = avg + zScore * errorStd;
+                        const confInf = avg - zScore * errorStd;
+                        const cp = (tabla.les - tabla.lei) / (6 * std);
+                        const cpkSup = (tabla.les - avg) / (3 * std);
+                        const cpkInf = (avg - tabla.lei) / (3 * std);
+
+                        return { avg, std, range, max, min, lcs, lci, confSup, confInf, cp, cpkSup, cpkInf };
+                    });
+
+                    for (let i = 0; i < 3; i++) {
+                        const res = resultados[i];
+                        const prefix = tabla.prefix + (i + 1);
+                        if (!res) {
+                            ['avg', 'std', 'range', 'max', 'min', 'lcs', 'lci', 'confSup', 'confInf', 'cp', 'cpkSup', 'cpkInf']
+                                .forEach(stat => document.getElementById(`${stat}${prefix}`).textContent = 'N/A');
+                            continue;
+                        }
+                        document.getElementById(`avg${prefix}`).textContent = res.avg.toFixed(2);
+                        document.getElementById(`std${prefix}`).textContent = res.std.toFixed(2);
+                        document.getElementById(`range${prefix}`).textContent = res.range.toFixed(2);
+                        document.getElementById(`max${prefix}`).textContent = res.max.toFixed(2);
+                        document.getElementById(`min${prefix}`).textContent = res.min.toFixed(2);
+                        document.getElementById(`lcs${prefix}`).textContent = res.lcs.toFixed(2);
+                        document.getElementById(`lci${prefix}`).textContent = res.lci.toFixed(2);
+                        document.getElementById(`confSup${prefix}`).textContent = res.confSup.toFixed(2);
+                        document.getElementById(`confInf${prefix}`).textContent = res.confInf.toFixed(2);
+                        document.getElementById(`cp${prefix}`).textContent = res.cp.toFixed(2);
+                        document.getElementById(`cpkSup${prefix}`).textContent = res.cpkSup.toFixed(2);
+                        document.getElementById(`cpkInf${prefix}`).textContent = res.cpkInf.toFixed(2);
+                    }
+
+                    if (window[`chart${index + 1}`]) window[`chart${index + 1}`].destroy();
+                    const ctx = document.getElementById(tabla.graficoId).getContext('2d');
+                    const mostrarLimites = document.getElementById(tabla.mostrarLimitesId).checked;
+
+                    const datasets = [
+                        { label: `Lote 1 (${index === 0 ? 'Datos_1' : 'Datos_2'})`, data: datos[0], borderColor: 'red', fill: false },
+                        { label: `Lote 2 (${index === 0 ? 'Datos_1' : 'Datos_2'})`, data: datos[1], borderColor: 'blue', fill: false },
+                        { label: `Lote 3 (${index === 0 ? 'Datos_1' : 'Datos_2'})`, data: datos[2], borderColor: 'green', fill: false }
+                    ];
+
+                    if (mostrarLimites) {
+                        resultados.forEach((res, i) => {
+                            if (res) {
+                                datasets.push({
+                                    label: `LCS Lote ${i+1}`,
+                                    data: Array(datos[i].length).fill(res.lcs),
+                                    borderColor: datasets[i].borderColor,
+                                    borderDash: [5, 5],
+                                    fill: false,
+                                    pointRadius: 0
+                                });
+                                datasets.push({
+                                    label: `LCI Lote ${i+1}`,
+                                    data: Array(datos[i].length).fill(res.lci),
+                                    borderColor: datasets[i].borderColor,
+                                    borderDash: [5, 5],
+                                    fill: false,
+                                    pointRadius: 0
+                                });
+                            }
+                        });
+                    }
+
+                    window[`chart${index + 1}`] = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: Array.from({ length: Math.max(...datos.map(d => d.length)) }, (_, i) => `Muestra ${i+1}`),
+                            datasets: datasets
+                        },
+                        options: {
+                            scales: {
+                                y: { beginAtZero: false }
+                            }
+                        }
+                    });
+                });
+            } catch (error) {
+                document.getElementById('errorDatos').textContent = `Error al procesar los datos: ${error.message}`;
+            }
+        }
+
+        function exportarCSV() {
+            try {
+                let csvContent = "data:text/csv;charset=utf-8,";
+
+                // Configuración general
+                csvContent += "Configuración General\n";
+                csvContent += `Título de Datos,${document.getElementById('tituloDatos').value}\n`;
+                csvContent += `Analista,${document.getElementById('analista').value}\n`;
+                csvContent += `Lote,${document.getElementById('lote').value}\n`;
+                csvContent += `Hora Inicio,${document.getElementById('horaInicio').value}\n`;
+                csvContent += `Hora Final,${document.getElementById('horaFinal').value}\n`;
+                csvContent += `LES Datos_1,${document.getElementById('les1').value}\n`;
+                csvContent += `LEI Datos_1,${document.getElementById('lei1').value}\n`;
+                csvContent += `LES Datos_2,${document.getElementById('les2').value}\n`;
+                csvContent += `LEI Datos_2,${document.getElementById('lei2').value}\n`;
+                csvContent += `Nivel de Confianza,${document.getElementById('confidenceLevel').value}\n\n`;
+
+                // Datos_1
+                csvContent += "Datos_1\n";
+                csvContent += "Muestra,Lote 1,Lote 2,Lote 3\n";
+                const filas1 = document.getElementById('tablaBody1').getElementsByTagName('tr');
+                for (let i = 0; i < filas1.length; i++) {
+                    const inputs = filas1[i].getElementsByTagName('input');
+                    const valores = [i + 1];
+                    for (let j = 0; j < 3; j++) {
+                        valores.push(inputs[j].value || '');
+                    }
+                    csvContent += valores.join(',') + '\n';
+                }
+
+                // Datos_2
+                csvContent += "\nDatos_2\n";
+                csvContent += "Muestra,Lote 1,Lote 2,Lote 3\n";
+                const filas2 = document.getElementById('tablaBody2').getElementsByTagName('tr');
+                for (let i = 0; i < filas2.length; i++) {
+                    const inputs = filas2[i].getElementsByTagName('input');
+                    const valores = [i + 1];
+                    for (let j = 0; j < 3; j++) {
+                        valores.push(inputs[j].value || '');
+                    }
+                    csvContent += valores.join(',') + '\n';
+                }
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement('a');
+                link.setAttribute('href', encodedUri);
+                link.setAttribute('download', 'control_calidad_datos.csv');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                document.getElementById('errorDatos').textContent = `Error al exportar CSV: ${error.message}`;
+            }
+        }
+
+        function cargarCSV(event) {
+            try {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const text = e.target.result;
+                    const rows = text.split('\n').map(row => row.trim().split(','));
+
+                    let section = '';
+                    let datos1 = [];
+                    let datos2 = [];
+
+                    for (let i = 0; i < rows.length; i++) {
+                        const row = rows[i];
+                        if (row[0] === 'Configuración General') {
+                            section = 'config';
+                            continue;
+                        } else if (row[0] === 'Datos_1') {
+                            section = 'datos1';
+                            i++; // Saltar encabezado
+                            continue;
+                        } else if (row[0] === 'Datos_2') {
+                            section = 'datos2';
+                            i++; // Saltar encabezado
+                            continue;
+                        }
+
+                        if (section === 'config' && row[0]) {
+                            switch (row[0]) {
+                                case 'Título de Datos': document.getElementById('tituloDatos').value = row[1] || ''; break;
+                                case 'Analista': document.getElementById('analista').value = row[1] || ''; break;
+                                case 'Lote': document.getElementById('lote').value = row[1] || ''; break;
+                                case 'Hora Inicio': document.getElementById('horaInicio').value = row[1] || ''; break;
+                                case 'Hora Final': document.getElementById('horaFinal').value = row[1] || ''; break;
+                                case 'LES Datos_1': document.getElementById('les1').value = row[1] || ''; break;
+                                case 'LEI Datos_1': document.getElementById('lei1').value = row[1] || ''; break;
+                                case 'LES Datos_2': document.getElementById('les2').value = row[1] || ''; break;
+                                case 'LEI Datos_2': document.getElementById('lei2').value = row[1] || ''; break;
+                                case 'Nivel de Confianza': document.getElementById('confidenceLevel').value = row[1] || '95'; break;
+                            }
+                        } else if (section === 'datos1' && row[0]) {
+                            datos1.push(row.slice(1));
+                        } else if (section === 'datos2' && row[0]) {
+                            datos2.push(row.slice(1));
+                        }
+                    }
+
+                    // Actualizar Datos_1
+                    const tbody1 = document.getElementById('tablaBody1');
+                    tbody1.innerHTML = '';
+                    numMuestras1 = datos1.length;
+                    datos1.forEach((fila, i) => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td>${i + 1}</td>
+                            <td><input type="number" step="0.1" value="${fila[0] || ''}"></td>
+                            <td><input type="number" step="0.1" value="${fila[1] || ''}"></td>
+                            <td><input type="number" step="0.1" value="${fila[2] || ''}"></td>`;
+                        tbody1.appendChild(tr);
+                    });
+
+                    // Actualizar Datos_2
+                    const tbody2 = document.getElementById('tablaBody2');
+                    tbody2.innerHTML = '';
+                    numMuestras2 = datos2.length;
+                    datos2.forEach((fila, i) => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td>${i + 1}</td>
+                            <td><input type="number" step="0.1" value="${fila[0] || ''}"></td>
+                            <td><input type="number" step="0.1" value="${fila[1] || ''}"></td>
+                            <td><input type="number" step="0.1" value="${fila[2] || ''}"></td>`;
+                        tbody2.appendChild(tr);
+                    });
+
+                    document.getElementById('errorDatos').textContent = 'Datos cargados correctamente. Haz clic en "Calcular y Graficar" para actualizar.';
+                };
+                reader.readAsText(file);
+            } catch (error) {
+                document.getElementById('errorDatos').textContent = `Error al cargar CSV: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
